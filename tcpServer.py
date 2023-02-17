@@ -8,7 +8,8 @@ import _thread as thread
 
 
 def broadcast(connection):
-    print("Hallo")
+    connection.recv(1024)
+    connection.send("Ny klient joinet server!".encode())
 
 
 def handleClient(connection):
@@ -23,24 +24,21 @@ def handleClient(connection):
         else:
             continue
     print("Server is shut down")
+    thread.exit()
     connection.close()
-    serverSocket.close()
 
 
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
-try:
-    serverSocket.bind(('', serverPort))
-except:
-    print("her gikk noe galt. Bind failed: ")
+serverSocket.bind(('', serverPort))
 serverSocket.listen(1)
 print("Server is running and listening")
 while True:
     connectionsocket, addr = serverSocket.accept()
     print("Server connected by", addr)
-    thread.start_new_thread(handleClient, (connectionsocket,))
-#serverSocket.close()
-
-
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    try:
+        broadcast(connectionsocket, )
+        thread.start_new_thread(handleClient, (connectionsocket,))
+    except:
+        print("Something went wrong")
+serverSocket.close()
